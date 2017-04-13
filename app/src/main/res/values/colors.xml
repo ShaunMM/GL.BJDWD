@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorblue">#3399fe</color>
+    <color name="guidtoast">#003399</color>
+    <color name="colorblue2">#66cbfe</color>
+
+    <color name="myred">#eb4f38</color>
+    <color name="darkgray">#cccc</color>
+    <color name="color_white">#ffffff</color>
+    <color name="btn_press_color">#5677fc</color>
+    <color name="btn_pressed_color">#3ca0ec</color>
+    <color name="white">#ffffff</color>
+
+    <!--首页9大功能模块背景颜色   矢车菊的蓝色、春天的绿色、淡蓝色、酸橙绿、绿宝石、秋麒麟、橙色、皇家蓝、板岩暗蓝灰色-->
+    <color name="fuction_cornflowerblue">#6495ed</color>
+    <color name="fuction_springgreen">#3cb371</color>
+    <color name="fuction_lightskyblue">#87cefa</color>
+    <color name="fuction_lime">#6495ed</color>
+    <color name="fuction_turquoise">#40e0d0</color>
+    <color name="fuction_goldenrod">#daa520</color>
+    <color name="fuction_orange">#ffa500</color>
+    <color name="fuction_royablue">#4169e1</color>
+    <color name="fuction_slateblue">#6a5acd</color>
+
+    <!--搜索提示背景-->
+    <color name="whitesmoke">#f5f5f5</color>
+
+</resources>

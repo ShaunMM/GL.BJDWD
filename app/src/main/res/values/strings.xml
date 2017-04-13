@@ -1,0 +1,8 @@
+<resources>
+<string name="app_name">北京电务段</string>
+<string name="login_hint">北京电务段车载设备作业指导系统</string>
+
+<string name="main_title_hint">北京电务段车载设备</string>
+<string name="main_title_hint1">作业指导系统</string>
+
+</resources>

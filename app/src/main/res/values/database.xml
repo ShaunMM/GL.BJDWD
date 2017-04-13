@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="DATABASE_INFO">
+        <item>bjdwd.db</item>
+        <item>1</item>
+    </array>
+    <integer name="DATABASE_VERSION">1</integer>
+    <array name="CREATE_TABLE_SQL">
+        <!--系统用户表(登录返回的用户数据)-->
+        <item>create table if not exists UserInfo(Id INTEGER PRIMARY KEY autoincrement,UserId
+            integer,Name text,Gender integer,HeadPortraitPath text,DepartmentId text,AddTime
+            text,DepartmentName text,ParentDepartmentId integer,WorkNo
+            text,Username text,UserType text,Password text)
+        </item>
+
+        <!--文件夹信息表-->
+        <item>create table if not exists DirsInfo(Id INTEGER PRIMARY KEY autoincrement,DirId
+            integer,DirName text,DepartmentId integer,ParentId
+            integer,IsTopestDir text
+            not null DEFAULT false,CreateTime text,LastModifyTime text,CreatorId
+            integer,IsDeleted text not null DEFAULT false,IsCommon text not null DEFAULT false)
+        </item>
+
+        <!--文件信息表   (新增本地path 是否下载过)-->
+        <item>create table if not exists FileInfo(Id INTEGER PRIMARY KEY autoincrement ,FileName
+            text, FileInfoId
+            integer,FileDirectoryId integer,SystemUserId integer,LastModifyTime
+            text,IsDeleted text
+            not null DEFAULT false,Extension text,Size integer,Path text,UploadTime
+            text,FileIsDeleted text
+            not null DEFAULT false,HashCode text,DepartmentId integer,IsCommon text
+            not null DEFAULT false,LocalPath text,IsLoad integer)
+        </item>
+
+
+        <!-- 功能模块信息展示  目录表-->
+        <item>
+            create table if not exists DirectoryInfo(Id INTEGER PRIMARY KEY autoincrement
+            ,DirectoryName
+            text, DirectoryId
+            integer,DirectoryType text,Extension text,IsDeleted text
+            not null DEFAULT false,Isload text
+            not null DEFAULT false,Path text,LocaPath text,MemuId integer,IsCommon text
+            not null DEFAULT false)
+        </item>
+
+        <!--记事本-->
+        <item>
+            create table if not exists NotePad(Id integer PRIMARY KEY autoincrement,UserName
+            text,Title
+            text,Content text,Time text)
+        </item>
+    </array>
+
+    <array name="UPDATE_TABLE_SQL">
+        <item></item>
+    </array>
+
+</resources>
