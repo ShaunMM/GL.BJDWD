@@ -22,10 +22,46 @@
         <item>@drawable/main_biaozhunhuachuangjian</item>
         <item>@drawable/main_wumeijiaoyu</item>
         <item>@drawable/main_systemtool</item>
+        <item>@drawable/main_guizhangzhidu</item>
+        <item>@drawable/main_zuoyezhidaoshu</item>
+        <item>@drawable/main_taizhangziliao</item>
+        <item>@drawable/main_jishuziliao</item>
+        <item>@drawable/main_yingjichuli</item>
+        <item>@drawable/main_biaozhunhuazuoye</item>
+        <item>@drawable/main_biaozhunhuachuangjian</item>
+        <item>@drawable/main_wumeijiaoyu</item>
+        <item>@drawable/main_systemtool</item>
+        <item>@drawable/main_guizhangzhidu</item>
+        <item>@drawable/main_zuoyezhidaoshu</item>
+        <item>@drawable/main_taizhangziliao</item>
+        <item>@drawable/main_jishuziliao</item>
+        <item>@drawable/main_yingjichuli</item>
+        <item>@drawable/main_biaozhunhuazuoye</item>
+        <item>@drawable/main_biaozhunhuachuangjian</item>
+        <item>@drawable/main_wumeijiaoyu</item>
+        <item>@drawable/main_systemtool</item>
     </integer-array>
 
     <!--矢车菊的蓝色、春天的绿色、淡蓝色、酸橙绿、绿宝石、秋麒麟、橙色、皇家蓝、板岩暗蓝灰色-->
     <integer-array name="functionsbgcolor">
+        <item>@color/fuction_cornflowerblue</item>
+        <item>@color/fuction_springgreen</item>
+        <item>@color/fuction_lightskyblue</item>
+        <item>@color/fuction_lime</item>
+        <item>@color/fuction_turquoise</item>
+        <item>@color/fuction_goldenrod</item>
+        <item>@color/fuction_orange</item>
+        <item>@color/fuction_royablue</item>
+        <item>@color/fuction_slateblue</item>
+        <item>@color/fuction_cornflowerblue</item>
+        <item>@color/fuction_springgreen</item>
+        <item>@color/fuction_lightskyblue</item>
+        <item>@color/fuction_lime</item>
+        <item>@color/fuction_turquoise</item>
+        <item>@color/fuction_goldenrod</item>
+        <item>@color/fuction_orange</item>
+        <item>@color/fuction_royablue</item>
+        <item>@color/fuction_slateblue</item>
         <item>@color/fuction_cornflowerblue</item>
         <item>@color/fuction_springgreen</item>
         <item>@color/fuction_lightskyblue</item>

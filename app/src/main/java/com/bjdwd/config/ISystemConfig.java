@@ -54,8 +54,25 @@ public interface ISystemConfig {
 
     public void setWebPort(int port);
 
+    public int getFilePort();
+
+    public void setFilePort(int port);
+
     public String getToken();
 
     public void setToken(String token);
+
+    public String getCatalogMaxId();
+
+    public void setCatalogMaxId(String catalogmaxid);
+
+    //文件 上次检查更新所保存的最大id值
+    public String getNewFileMaxId();
+
+    public void setNewFileMaxId(String newfilemaxid);
+
+    public boolean isGetPermission();
+
+    public void setPermission(boolean isGetPermission);
 
 }

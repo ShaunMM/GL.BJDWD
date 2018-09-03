@@ -55,6 +55,12 @@ public class SQLClass {
         return listsearch;
     }
 
+    public static List<Map> getDataToDirName(HandleDBHelper handleDBHelper, String tablename, String code) {
+        String sql = "select * from " + tablename + " where DirectoryName =?";
+        List<Map> listsearch = handleDBHelper.queryListMap(sql, new String[]{code});
+        return listsearch;
+    }
+
     //通过文件类 Id 查文件夹
     public static List<Map> getFileDataToId(HandleDBHelper handleDBHelper, String tablename, String code) {
         String sql = "select * from " + tablename + " where Id=?";
@@ -65,6 +71,13 @@ public class SQLClass {
     //通过目录Id 查文件信息
     public static List<Map> getDirectoryDataToMemuId(HandleDBHelper handleDBHelper, String tablename, String code) {
         String sql = "select * from " + tablename + " where MemuId=?";
+        List<Map> listsearch = handleDBHelper.queryListMap(sql, new String[]{code});
+        return listsearch;
+    }
+
+    //通过FileDirectoryId 查文件信息
+    public static List<Map> getDataToFileDirectoryId(HandleDBHelper handleDBHelper, String tablename, String code) {
+        String sql = "select * from " + tablename + " where FileInfoId=?";
         List<Map> listsearch = handleDBHelper.queryListMap(sql, new String[]{code});
         return listsearch;
     }
@@ -99,10 +112,8 @@ public class SQLClass {
         return listsearch;
     }
 
-
-    public static boolean deleteAData(HandleDBHelper handleDBHelper, String tablename, String column, String code) {
-        String sql = "select * from " + "tablename ";
-        boolean isDelete = handleDBHelper.delete(sql, new String[]{column}, new String[]{code});
+    public static boolean deleteData(HandleDBHelper handleDBHelper, String tablename, String column, String code) {
+        boolean isDelete = handleDBHelper.delete(tablename, new String[]{column}, new String[]{code});
         return isDelete;
     }
 

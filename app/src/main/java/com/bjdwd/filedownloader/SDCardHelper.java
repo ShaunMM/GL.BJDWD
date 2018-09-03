@@ -6,15 +6,19 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import static org.apache.tools.ant.taskdefs.Antlib.TAG;
 
 public class SDCardHelper {
 
@@ -133,41 +137,75 @@ public class SDCardHelper {
      * @return true -->保存成功
      * @des 保存文件到sd卡自定义目录之下
      */
-    public static boolean saveFileToSDCardCustomDir(byte[] data, String dir,
-                                                    String fileName) {
+    public static boolean saveFileToSDCardCustomDir(byte[] data, String dir, String fileName) {
         if (isSDCardMounted()) {
             File file = new File(fileSdkPath(dir));
             //判断这个文件夹是否存在，如果不存在就创建
             if (!file.exists()) {
                 file.mkdirs();
             }
+
             FileOutputStream fos = null;
             BufferedOutputStream bos = null;
-            try {
-                fos = new FileOutputStream(new File(file, fileName));
+            try{
+//                fos = new FileOutputStream(new File(file,fileName));
+                File filess = new File(file,fileName);
+                fos = new FileOutputStream(filess);
                 bos = new BufferedOutputStream(fos);
-                bos.write(data, 0, data.length);
+                bos.write(data,0,data.length);
                 bos.flush();
-                return true;
-            } catch (FileNotFoundException e) {
+//                return true;
+            }catch (Exception e){
                 e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
+            }finally {
+                try{
                     fos.close();
                     bos.close();
-                } catch (IOException e) {
+                }catch (Exception e){
                     e.printStackTrace();
                 }
             }
+
+
+////
+////            FileOutputStream fos = null;
+////            FileInputStream bos = null;
+//            try {
+//                //
+//
+////                 bos =  new FileInputStream(String.valueOf(data));
+////                fos = new FileOutputStream(new File(file, fileName));
+////                fos .write(data, 0, data.length);
+////                fos.flush();
+////                fos.close();
+////                bos.close();
+//
+//
+//                    while (!new File(file + "/" + fileName).exists()) {
+//                        new File(file + "/" + fileName).createNewFile();
+//                        Log.e(TAG, "saveFileToSDCardCustomDir: " + file + "/" + fileName + new File(file + "/" + fileName).exists());
+//                    }
+//
+//
+//
+//                FileOutputStream fileOutputStream = new FileOutputStream(file + "/" + fileName);
+//                // for (int i = 0; i < imgByte.length; i = i + 1024) {
+//                fileOutputStream.write(data);
+//                // }
+//                fileOutputStream.flush();
+//                fileOutputStream.close();
+//
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
         }
-        return false;
+        return true;
     }
 
     //文件路径
     public static String fileSdkPath(String dir) {
         return getSDCardBasePath() + File.separator + dir;
+//        return getSDCardBasePath() + File.separator + dir+"/sss/";
     }
 
     /**

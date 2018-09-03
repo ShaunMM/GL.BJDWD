@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 /**
- * Created by dell on 2017/3/23.
+ * Created by byj on 2017/3/23.
  */
 public class SystemConfig implements ISystemConfig {
     private final static String CONFIG_FILENAME = "appbase";
@@ -21,6 +21,9 @@ public class SystemConfig implements ISystemConfig {
     private final static String HOST = "host";
     private final static String WEBPORT = "WebPort";
     private final static String TOKEN = "token";
+    private final static String CATALOGMAXID = "catalogmaxid";//检查目录更新记录最大ID
+    private final static String NEWFILEMAXID = "newfilemaxid";//获取最新添加的文件
+    private final static String GETPERMISSION = "GetPermission";
 
     private Context context;
     private SharedPreferences systemConfigSharedPreferences;
@@ -117,24 +120,32 @@ public class SystemConfig implements ISystemConfig {
 
     @Override
     public String getHost() {
-        return this.getSystemConfigSharedPreferences().getString(HOST, "http://192.168.1.103:");
+        return this.getSystemConfigSharedPreferences().getString(HOST, "http://192.168.0.124:");
     }
 
     @Override
     public void setHost(String host) {
         this.getSystemConfigSharedPreferences().edit().putString(HOST, host).commit();
-
     }
 
     @Override
     public int getWebPort() {
-        return this.getSystemConfigSharedPreferences().getInt(WEBPORT, 8016);
+        return this.getSystemConfigSharedPreferences().getInt(WEBPORT, 8093);
     }
 
     @Override
     public void setWebPort(int port) {
         this.getSystemConfigSharedPreferences().edit().putInt(WEBPORT, port).commit();
+    }
 
+    @Override
+    public int getFilePort() {
+        return this.getSystemConfigSharedPreferences().getInt(WEBPORT, 8092);
+    }
+
+    @Override
+    public void setFilePort(int port) {
+        this.getSystemConfigSharedPreferences().edit().putInt(WEBPORT, port).commit();
     }
 
     @Override
@@ -145,6 +156,26 @@ public class SystemConfig implements ISystemConfig {
     @Override
     public void setToken(String token) {
         this.getSystemConfigSharedPreferences().edit().putString(TOKEN, token).commit();
+    }
+
+    @Override
+    public String getCatalogMaxId() {
+        return this.getSystemConfigSharedPreferences().getString(CATALOGMAXID, "0");
+    }
+
+    @Override
+    public void setCatalogMaxId(String catalogmaxid) {
+        this.getSystemConfigSharedPreferences().edit().putString(CATALOGMAXID, catalogmaxid).commit();
+    }
+
+    @Override
+    public String getNewFileMaxId() {
+        return this.getSystemConfigSharedPreferences().getString(NEWFILEMAXID, "0");
+    }
+
+    @Override
+    public void setNewFileMaxId(String newfilemaxid) {
+        this.getSystemConfigSharedPreferences().edit().putString(NEWFILEMAXID, newfilemaxid).commit();
     }
 
     @Override
@@ -177,7 +208,16 @@ public class SystemConfig implements ISystemConfig {
     @Override
     public void setFirstSync(boolean isFirstSync) {
         this.getSystemConfigSharedPreferences().edit().putBoolean(ISFIRSTSYNC, isFirstSync).commit();
+    }
 
+    @Override
+    public boolean isGetPermission() {
+        return this.getSystemConfigSharedPreferences().getBoolean(GETPERMISSION, true);
+    }
+
+    @Override
+    public void setPermission(boolean isGetPermission) {
+        this.getSystemConfigSharedPreferences().edit().putBoolean(GETPERMISSION, isGetPermission).commit();
     }
 
 }

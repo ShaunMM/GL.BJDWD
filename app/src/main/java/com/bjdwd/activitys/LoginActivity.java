@@ -1,12 +1,16 @@
 package com.bjdwd.activitys;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
 import android.text.method.PasswordTransformationMethod;
 import android.view.KeyEvent;
 import android.view.View;
@@ -17,12 +21,10 @@ import com.bjdwd.BJDWDApplication;
 import com.bjdwd.R;
 import com.bjdwd.beans.LoginBackBean;
 import com.bjdwd.config.ISystemConfig;
-import com.bjdwd.config.SystemConfig;
 import com.bjdwd.config.SystemConfigFactory;
 import com.bjdwd.dbutils.HandleDBHelper;
 import com.bjdwd.tools.DialogTool;
 import com.bjdwd.tools.HttpTool;
-import com.bjdwd.tools.JSONConvertTool;
 import com.bjdwd.tools.ShowToastTool;
 import com.bjdwd.tools.WiFiTool;
 import com.google.gson.Gson;
@@ -30,13 +32,11 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Created by dell on 2017/3/23.
+ * Created by BYJ 2017/3/23.
  */
 public class LoginActivity extends Activity implements View.OnClickListener {
 
@@ -48,6 +48,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     private HandleDBHelper handleDBHelper;
     private ISystemConfig systemConfig;
     private int loginCode = -1;
+    final public static int REQUEST_EXTERNAL_STRONGE = 123;
 
     private Handler loginHandler = new Handler() {
         @Override
@@ -58,7 +59,6 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             if (n == 1) {
                 try {
                     DialogTool.cancelprogressDialog();
-                    systemConfig.setFirstUse(true);
                     Intent intent = new Intent();
                     intent.setClass(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
@@ -73,22 +73,57 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             } else if (n == 2) {
                 DialogTool.cancelprogressDialog();
                 ShowToastTool.showToast(LoginActivity.this, "数据写入数据库有误");
+            } else if (n == -1) {
+                DialogTool.cancelprogressDialog();
+                ShowToastTool.showToast(LoginActivity.this, "连接超时");
             }
         }
     };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         systemConfig = SystemConfigFactory.getInstance(LoginActivity.this).getSystemConfig();
+        //获取权限
+        askForPermission();
+        try {
+            Thread.currentThread().sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        //第一次使用登录界面
         if (systemConfig.isFirstUse()) {
             initView();
         } else {
+            systemConfig.setFirstUse(false);
             Intent intent = new Intent();
             intent.setClass(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
+        }
+    }
+
+    private void askForPermission() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_EXTERNAL_STRONGE);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_EXTERNAL_STRONGE && grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            try {
+                ShowToastTool.showToast(LoginActivity.this, "获得存储应用权限！");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (requestCode == REQUEST_EXTERNAL_STRONGE && grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+            ShowToastTool.showToast(LoginActivity.this, "权限申请被拒绝！");
         }
     }
 
@@ -102,29 +137,30 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         handleDBHelper = HandleDBHelper.getInstance(getApplicationContext());
     }
 
-
     @Override
     public void onClick(View v) {
         clickLogin();
     }
 
+    //登录
     public void clickLogin() {
         account = et_account.getText().toString();
         password = et_password.getText().toString();
 
+        //判断是否连网
         if (WiFiTool.isWifi(LoginActivity.this)) {
             if (account.equals("") || password.equals("")) {
                 ShowToastTool.showToast(LoginActivity.this, "请填写账号和密码");
             } else {
                 if (account.equals("1234") && password.equals("1234")) {
+                    //更改IP地址
                     upDataServerUrl();
                 } else {
-                    //登录提示
-                    DialogTool.setprogressDialog(LoginActivity.this, "登录中");
+                    //用户登录连网验证
+                    DialogTool.setprogressDialog(LoginActivity.this, "用户登录中...");
                     BJDWDApplication.getExecutorService().execute(new Runnable() {
                         @Override
                         public void run() {
-                            //向服务器发送账号和密码 请求登录   参数  account  password
                             Map<String, String> loginRequest = new HashMap();
                             loginRequest.put("password", password);
                             loginRequest.put("account", account);
@@ -134,7 +170,10 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                                 JSONObject jsonObject = new JSONObject(loginReceipt);
                                 if (jsonObject.get("code").equals("403")) {
                                     loginCode = 0;
+                                } else if (jsonObject.get("code").equals("-1")) {
+                                    loginCode = -1;
                                 } else {
+                                    //登录成功返回的用户信息 写入 数据库
                                     boolean wrisok = false;
                                     wrisok = wrLoginInfoTb(loginReceipt);
                                     if (wrisok) {
@@ -154,11 +193,31 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
                 }
             }
-
         } else {
-            ShowToastTool.showToast(LoginActivity.this, "无线网络未连接...");
-        }
+            ShowToastTool.showToast(LoginActivity.this, "网络未连接，请检查WiFi是否连接...");
+            getAccoPass();
 
+        }
+    }
+
+    private void getAccoPass() {
+        if (!account.isEmpty() && !password.isEmpty()) {
+            if (!account.equals(systemConfig.getUserAccount())) {
+                ShowToastTool.showToast(LoginActivity.this, "账号不正确");
+            } else {
+                if (password.equals(systemConfig.getPassword())) {
+                    Intent intent = new Intent();
+                    intent.setClass(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                    ShowToastTool.showToast(LoginActivity.this, "网络未连接..现为本地登录");
+                } else {
+                    ShowToastTool.showToast(LoginActivity.this, "密码有误");
+                }
+            }
+        } else {
+            ShowToastTool.showToast(LoginActivity.this, "账号密码不能为空");
+        }
     }
 
     private void upDataServerUrl() {
@@ -172,7 +231,6 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         ShowToastTool.showToast(LoginActivity.this, "确定");
                         String serverAddress = ed.getText() + "";
                         if (!serverAddress.equals("") && !serverAddress.isEmpty()) {
-                            //新的服务器地址写到配置文件里
                             systemConfig.setHost(serverAddress);
                         }
                     }
@@ -184,7 +242,6 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                     }
                 })
                 .show();
-
     }
 
     private boolean wrLoginInfoTb(String loginReceipt) {
@@ -198,11 +255,12 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         systemConfig.setUserAccount(userBean.getWorkNo());
         systemConfig.setUserName(userBean.getUsername());
         systemConfig.setUserId(userBean.getId());
+        systemConfig.setPassword(password);
         systemConfig.setUserType(userBean.getUserType());
         systemConfig.setParentDepartmentId(userBean.getParentDepartmentId());
+
         boolean isok = false;
 
-        //写如数据库
         isok = handleDBHelper.insert("UserInfo", new String[]{"UserId", "Name", "Gender", "HeadPortraitPath",
                         "DepartmentId", "AddTime", "DepartmentName", "ParentDepartmentId", "WorkNo", "Username", "UserType", "Password"},
                 new Object[]{userBean.getId(), userBean.getName(),
@@ -225,5 +283,5 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         }
         return super.onKeyDown(keyCode, event);
     }
-
 }
+

@@ -18,7 +18,6 @@ import java.util.Map;
 /**
  * Created by dell on 2017/3/27.
  */
-
 public class MainGVAdapter extends BaseAdapter {
     private Context context;
     private List <Map<String, Object>> functionsItemList;

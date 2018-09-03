@@ -13,7 +13,7 @@ import java.io.FileInputStream;
 import java.util.Map;
 
 /**
- * Created by dell on 2017/3/30.
+ * Created by BYJ  on 2017/3/30.
  */
 
 public class FileShowTool {
@@ -23,6 +23,7 @@ public class FileShowTool {
         String fileExtension = fileInfoMap.get("Extension").toString();
         fileExtension.toLowerCase();
         String filepath = fileInfoMap.get("LocaPath").toString();
+
         if (fileExtension.equals(".zip") || fileExtension.equals(".rar")) {
             if (filepath != null && !filepath.equals("")) {
                 File file = new File(filepath);
@@ -37,7 +38,7 @@ public class FileShowTool {
                 ShowToastTool.showToast(context, "该文件存在问题");
             }
 
-        } else if (fileExtension.equals(".htm")) {
+        } else if (fileExtension.equals(".htm")|| fileExtension.equals(".html")) {
             if (filepath != null && !filepath.equals("")) {
                 Intent htmlintent = new Intent(context, HtmlWebViewActivity.class);
                 htmlintent.putExtra("FilePath", filepath);
@@ -46,7 +47,8 @@ public class FileShowTool {
                 ShowToastTool.showToast(context, "该文件存在问题");
             }
 
-        } else if (fileExtension.equals(".mp4") || fileExtension.equals(".mp3")) {
+        } else if (fileExtension.equals(".mp4") || fileExtension.equals(".mp3")|| fileExtension.equals(".avi")
+                || fileExtension.equals(".mpg") || fileExtension.equals(".wmv")) {
             if (filepath != null && !filepath.equals("")) {
                 Intent videointent = new Intent(Intent.ACTION_VIEW);
                 videointent.setDataAndType(Uri.parse(filepath), "video/*");
@@ -54,13 +56,17 @@ public class FileShowTool {
             } else {
                 ShowToastTool.showToast(context, "该文件存在问题");
             }
-        } else if (fileExtension.equals(".doc") || fileExtension.equals(".ppt") || fileExtension.equals(".xls") || fileExtension.equals(".pdf") || fileExtension.equals(".rtf")) {
+        } else if (fileExtension.equals(".docx") || fileExtension.equals(".pptx") || fileExtension.equals(".pdf")
+                || fileExtension.equals(".doc") || fileExtension.equals(".ppt") || fileExtension.equals(".xls")
+                || fileExtension.equals(".xlsx") || fileExtension.equals(".ppsx") || fileExtension.equals(".wps")
+                || fileExtension.equals(".txt"))  {
             if (filepath != null && !filepath.equals("")) {
                 WpsTool.wpsOpenFile(filepath, context);
             } else {
                 ShowToastTool.showToast(context, "该文件存在问题");
             }
-        } else if (fileExtension.equals(".png") || fileExtension.equals(".jpg")) {
+        } else if (fileExtension.equals(".png") || fileExtension.equals(".jpg") || fileExtension.equals(".jpeg")
+                || fileExtension.equals(".bmp") || fileExtension.equals(".JPG")) {
             if (filepath != null && !filepath.equals("")) {
                 File file = new File(filepath);
                 if (file != null && file.isFile() == true) {
@@ -77,35 +83,28 @@ public class FileShowTool {
         }
     }
 
-    //获取文件的解码字体
     public static String getFileIncode(File file) {
 
         if (!file.exists()) {
             System.err.println("getFileIncode: file not exists!");
             return null;
         }
-
         byte[] buf = new byte[4096];
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(file);
-            // (1)
             UniversalDetector detector = new UniversalDetector(null);
-            // (2)
             int nread;
             while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
                 detector.handleData(buf, 0, nread);
             }
-            // (3)
             detector.dataEnd();
-            // (4)
             String encoding = detector.getDetectedCharset();
             if (encoding != null) {
                 System.out.println("Detected encoding = " + encoding);
             } else {
                 System.out.println("No encoding detected.");
             }
-            // (5)
             detector.reset();
             fis.close();
             return encoding;
@@ -114,6 +113,5 @@ public class FileShowTool {
         }
         return null;
     }
-
 
 }

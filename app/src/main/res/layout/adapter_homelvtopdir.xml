@@ -21,6 +21,6 @@
         android:gravity="center_horizontal"
         android:text="行车资料"
         android:textColor="@color/color_white"
-        android:textSize="18sp" />
+        android:textSize="22sp" />
 
 </LinearLayout>

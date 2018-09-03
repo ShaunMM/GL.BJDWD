@@ -6,12 +6,13 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="55dp"
         android:layout_marginLeft="3dp"
         android:layout_marginRight="3dp"
         android:layout_marginTop="3dp"
         android:background="@color/colorblue"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/tv_currentfunction"
@@ -20,7 +21,8 @@
             android:gravity="center"
             android:text="作业指导书"
             android:textColor="@color/color_white"
-            android:textSize="20sp" />
+            android:textStyle="bold"
+            android:textSize="24sp" />
     </LinearLayout>
 
     <ListView

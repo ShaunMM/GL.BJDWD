@@ -34,6 +34,7 @@ public class HttpTool {
 
     /**
      * 通过HttpURLConnection获得字符串数据
+     *
      * @param ：params--->网络请求地址
      * @return 返回请求获得字符串数据
      */
@@ -87,7 +88,8 @@ public class HttpTool {
 
     /**
      * 通过HttpURLConnection获得字节数组
-     *    文件下载
+     * 文件下载
+     *
      * @param ：params--->网络请求地址
      * @return 返回请求获得字节数组
      */
@@ -97,11 +99,9 @@ public class HttpTool {
         try {
             URL url = new URL(params);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            //connection.setRequestMethod("POST");
-            //connection.setDoOutput(true);
             bis = new BufferedInputStream(connection.getInputStream());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte buffer[] = new byte[1024 * 8];
+            byte buffer[] = new byte[1024 * 4];
             int len = 0;
             while ((len = bis.read(buffer)) != -1) {
                 baos.write(buffer, 0, len);
@@ -109,6 +109,18 @@ public class HttpTool {
             }
             byte data[] = baos.toByteArray();
             return data;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (bis != null) {
+//                try {
+//                    bis.close();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -165,7 +177,6 @@ public class HttpTool {
         //getRequestData(params, encode).toString() = "account=800612&password=123456"
         byte[] data = getRequestData(params, encode).toString().getBytes();//获得请求体
         try {
-            //String urlPath = "http://192.168.1.9:8016/api/login";
             URL url = new URL(strUrlPath);
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setConnectTimeout(3000);     //设置连接超时时间
@@ -198,9 +209,9 @@ public class HttpTool {
     }
 
     /*
-* Function  :   发送Get请求到服务器
-* Param     :   params请求体内容，encode编码格式
-*/
+     * Function  :   发送Get请求到服务器
+     * Param     :   params请求体内容，encode编码格式
+     */
     public static String submitGetRequest(String strUrlPath, String string, String encode) {
 
         try {
@@ -268,8 +279,7 @@ public class HttpTool {
     /**
      * 作用：实现网络访问文件，将获取到的数据保存在指定目录中
      *
-     * @param url
-     *            ：访问网络的url地址
+     * @param url ：访问网络的url地址
      * @return byte[]
      */
     public static boolean saveFileFromURL(String url, File destFile) {
@@ -312,5 +322,4 @@ public class HttpTool {
         }
         return false;
     }
-
 }

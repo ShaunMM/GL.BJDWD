@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="150dp"
+        android:layout_marginTop="100dp"
         android:text="@string/login_hint"
         android:textColor="@color/color_white"
         android:textSize="36sp" />
@@ -40,8 +40,10 @@
                 android:id="@+id/et_account"
                 android:layout_width="@dimen/login_tv_width"
                 android:layout_height="@dimen/login_tv_height"
-                android:text="600812"
-                android:hint="账户名" />
+                android:text="680012"
+                android:hint="账户名"
+                android:textSize="20sp"/>
+
         </LinearLayout>
 
         <TextView
@@ -57,14 +59,15 @@
                 android:id="@+id/imageView"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:background="@mipmap/user" />
+                android:background="@mipmap/password" />
 
             <EditText
                 android:id="@+id/et_password"
                 android:layout_width="@dimen/login_tv_width"
                 android:layout_height="@dimen/login_tv_height"
-                android:text="123456"
-                android:hint="密    码" />
+                android:text="680012"
+                android:hint="密    码"
+                android:textSize="20sp"/>
         </LinearLayout>
 
         <TextView
@@ -84,7 +87,7 @@
                 android:background="@mipmap/bg_button"
                 android:text="登      录"
                 android:textColor="@color/color_white"
-                android:textSize="20sp" />
+                android:textSize="24sp" />
         </LinearLayout>
     </LinearLayout>
 

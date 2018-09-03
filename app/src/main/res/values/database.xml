@@ -32,7 +32,6 @@
             not null DEFAULT false,LocalPath text,IsLoad integer)
         </item>
 
-
         <!-- 功能模块信息展示  目录表-->
         <item>
             create table if not exists DirectoryInfo(Id INTEGER PRIMARY KEY autoincrement
@@ -50,6 +49,31 @@
             text,Title
             text,Content text,Time text)
         </item>
+
+
+        <!-- 新的所有的表-->
+
+        <!--数据库更新操作记录表(主键、被操作表名、目标ID、操作类型 ())-->
+        <item>
+            create table if not exists DBOperatingRecord(Id INTEGER PRIMARY KEY autoincrement
+            ,TableName text, TargetId integer,OperatingType integer,UpdateTime text)
+        </item>
+
+        //文件表
+        <item>
+            create table if not exists NewFile(Id INTEGER PRIMARY KEY autoincrement
+            ,FileId integer,Extension text,Size text,Path text,LocalPath text,HashCode
+            text,UploadTime
+            text,IsDeleted text not null DEFAULT false )
+        </item>
+
+        <item>create table if not exists ExceptionLog(Id INTEGER PRIMARY KEY AUTOINCREMENT,Message
+            text,Source text,FileName text,Classname text,MethodName text,Instance text,Stacktrace
+            text,HappenTime text,IsDelete text not null default false,IsUploaded integer not null
+            default 1)
+        </item>
+
+
     </array>
 
     <array name="UPDATE_TABLE_SQL">

@@ -30,7 +30,6 @@ import com.bjdwd.interfaces.FragmentBackListener;
 import com.bjdwd.tools.DialogTool;
 import com.bjdwd.tools.HttpTool;
 import com.bjdwd.tools.ShowToastTool;
-import com.bjdwd.tools.WiFiTool;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,7 +97,7 @@ public class HomeActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+        BJDWDApplication.addActivity(this);
         systemConfig = SystemConfigFactory.getInstance(HomeActivity.this).getSystemConfig();
         handleDBHelper = HandleDBHelper.getInstance(getApplicationContext());
         httpUrl = systemConfig.getHost() + systemConfig.getWebPort() + LiteralClass.API_FILE;
@@ -108,15 +107,10 @@ public class HomeActivity extends FragmentActivity {
         positionId = Integer.parseInt(getIntent().getStringExtra("position"));
 
         lv_topdir = (ListView) findViewById(R.id.lv_topdir);
-
         initTopDIrData();
-        if (WiFiTool.isWifi(this)) {
-            getFileDirData(httpUrl, dirParentID);
-        } else {
-            initFragments();
-            initView(positionId);
-            ShowToastTool.showToast(HomeActivity.this, "无线网络未连接...");
-        }
+
+        initFragments();
+        initView(positionId);
     }
 
 
@@ -140,36 +134,6 @@ public class HomeActivity extends FragmentActivity {
         }
     }
 
-    private void getFileDirData(final String httpUrl, final int dirParentID) {
-        final String parm = dirParentID + LiteralClass.APP_TOKEN + systemConfig.getToken();
-        DialogTool.setprogressDialog(HomeActivity.this, "文件列表加载中");
-        BJDWDApplication.getExecutorService().execute(new Runnable() {
-            @Override
-            public void run() {
-                String fileReceipt = HttpTool.submitGetRequest(httpUrl, parm, LiteralClass.ENCODING);
-                boolean wrisok = false;
-                try {
-                    JSONObject jsonObject = new JSONObject(fileReceipt);
-                    if (jsonObject.getString("code").equals(LiteralClass.LOSE_EFFICACY_CODE)) {
-                        requestCode = 0;
-                    } else {
-                        wrisok = WRDatabase.wrTables(handleDBHelper, fileReceipt, String.valueOf(dirParentID));
-                        if (wrisok) {
-                            requestCode = 1;
-                        } else {
-                            requestCode = 2;
-                        }
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Message loginMessage = downloadHandler.obtainMessage();
-                loginMessage.arg1 = requestCode;
-                downloadHandler.sendMessage(loginMessage);
-            }
-        });
-    }
-
     private void initFragments() {
         manager = getSupportFragmentManager();
         byLawsFragment = new ByLawsFragment();
@@ -181,15 +145,10 @@ public class HomeActivity extends FragmentActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 positionId = position;
-                if (WiFiTool.isWifi(getApplicationContext())) {
-                    getFileDirData(httpUrl, (int) topDirListMap.get(position).get("DirId"));
-                } else {
-                    if (byLawsFragment == null) {
-                        initFragments();
-                    }
-                    initView(positionId);
-                    ShowToastTool.showToast(HomeActivity.this, "无线网络未连接...");
+                if (byLawsFragment == null) {
+                    initFragments();
                 }
+                initView(positionId);
             }
         });
     }
@@ -201,11 +160,11 @@ public class HomeActivity extends FragmentActivity {
 
     public void showFragmentByPosition(int position) {
         FragmentTransaction transaction = manager.beginTransaction();
-
         if (byLawsFragment.isAdded()) {
             transaction.remove(byLawsFragment);
             byLawsFragment = new ByLawsFragment();
         }
+
         transaction.add(R.id.frg_conn, byLawsFragment);
         Bundle bundle = new Bundle();
         bundle.putString("dirId", String.valueOf(topDirListMap.get(position).get("DirId")));
@@ -251,6 +210,7 @@ public class HomeActivity extends FragmentActivity {
     protected void onDestroy() {
         backListener = null;
         super.onDestroy();
+        BJDWDApplication.removeActivity(this);
     }
 
     @Override

@@ -16,7 +16,6 @@ import java.util.Map;
 /**
  * Created by dell on 2017/4/12.
  */
-
 public class HomeAdapter extends BaseAdapter {
     private Context context;
     private List<Map<String, Object>> functionsItemList;

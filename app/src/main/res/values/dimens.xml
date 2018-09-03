@@ -8,7 +8,7 @@
     <dimen name="login_tv_height">80dp</dimen>
 
     <!-- home  RadioButton 字大小-->
-    <dimen name="home_rb_textsize">18sp</dimen>
+    <dimen name="home_rb_textsize">24sp</dimen>
 
     <!-- 系统工具  -->
     <dimen name="systemToolstv_margin">30dp</dimen>

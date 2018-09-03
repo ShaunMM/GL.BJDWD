@@ -1,14 +1,14 @@
 package com.bjdwd.fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.test.mock.MockApplication;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,33 +28,36 @@ import com.bjdwd.config.SQLClass;
 import com.bjdwd.config.SystemConfigFactory;
 import com.bjdwd.dbutils.HandleDBHelper;
 import com.bjdwd.dbutils.WRDatabase;
-import com.bjdwd.filedownloader.FileUtil;
 import com.bjdwd.filedownloader.SDCardHelper;
 import com.bjdwd.interfaces.FragmentBackListener;
-import com.bjdwd.tools.DialogTool;
 import com.bjdwd.tools.FileShowTool;
 import com.bjdwd.tools.HttpTool;
 import com.bjdwd.tools.ShowToastTool;
+import com.bjdwd.tools.StorageTool;
 import com.bjdwd.tools.WiFiTool;
+import com.yanzhenjie.nohttp.Headers;
+import com.yanzhenjie.nohttp.NoHttp;
+import com.yanzhenjie.nohttp.download.DownloadListener;
+import com.yanzhenjie.nohttp.download.DownloadRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Created by dell on 2017/3/27.
+ * Created by BYJ on 2017/3/27.
  */
 public class ByLawsFragment extends Fragment implements FragmentBackListener {
     private View view;
     private TextView tv_currentfunction;
     private ListView lv_details;
     private List<Map> fileLists; //Adapter数据源
+    private List<Map> lists; //文件数据
     private HandleDBHelper handleDBHelper;
     private DocumentsShowAdapter documentsShowAdapter;
     private String dirName;
@@ -68,7 +71,9 @@ public class ByLawsFragment extends Fragment implements FragmentBackListener {
     private int requestCode = -1;
     private String directoryId;
     private String fileInfoId;
-    private String memudId;
+
+    private ProgressDialog progressDialog;
+    private DownloadRequest downloadRequest;
 
     private Handler downloadHandler = new Handler() {
         @Override
@@ -76,7 +81,7 @@ public class ByLawsFragment extends Fragment implements FragmentBackListener {
             super.handleMessage(msg);
             if (msg.arg1 == 1) {
                 try {
-                    DialogTool.cancelprogressDialog();
+                    cancelprogressDialog();
                     List<Map> mapList = SQLClass.getFileDataToId(handleDBHelper, "DirectoryInfo", fileInfoId);
                     if (mapList.size() != 0) {
                         FileShowTool.setFileShow(getContext(), mapList.get(0));
@@ -84,13 +89,19 @@ public class ByLawsFragment extends Fragment implements FragmentBackListener {
                 } catch (UnsupportedOperationException u) {
                     u.printStackTrace();
                 }
+            } else if (msg.arg1 == 0) {
+                ShowToastTool.showToast(getContext(), "登录已过最长时效，需重新登录");
+                Intent intent = new Intent();
+                intent.setClass(getActivity(), LoginActivity.class);
+                getActivity().startActivity(intent);
+                getActivity().finish();
             } else if (msg.arg1 == 2) {
-                DialogTool.cancelprogressDialog();
+                cancelprogressDialog();
             } else if (msg.arg1 == 3) {
-                DialogTool.cancelprogressDialog();
+                cancelprogressDialog();
                 ShowToastTool.showToast(getContext(), "网络请求下载文件失败");
             } else if (msg.arg1 == 4) {
-                DialogTool.cancelprogressDialog();
+                cancelprogressDialog();
                 setAdapterData();
             }
         }
@@ -130,7 +141,9 @@ public class ByLawsFragment extends Fragment implements FragmentBackListener {
         handleDBHelper = HandleDBHelper.getInstance(getActivity());
         systemConfig = SystemConfigFactory.getInstance(getActivity()).getSystemConfig();
         fileLists = new ArrayList<>();
+        fileLists = handleDBHelper.queryListMap("select * from NewFile ", null);
         fileLists = SQLClass.getDirectoryDataToMemuId(handleDBHelper, "DirectoryInfo", String.valueOf(dirId));
+
     }
 
     private void setAdapterData() {
@@ -154,15 +167,14 @@ public class ByLawsFragment extends Fragment implements FragmentBackListener {
         lv_details.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
                 Map<String, String> map = new HashMap<>();
                 map = fileLists.get(position);
                 fileInfoId = String.valueOf(map.get("Id"));
                 directoryId = String.valueOf(map.get("DirectoryId"));
-                memudId = String.valueOf(map.get("MemuId"));//MemuId      ParentId" = FileDirectoryId": 4,
                 allFolderName.add(map.get("DirectoryName").toString());
                 allFolderParentId.add(directoryId);
 
+                //先是文件夹和文件的分类
                 if (map.get("DirectoryType").toString().equals("dir")) {
                     final Map folderInfoMap = map;
                     fileLists.clear();
@@ -176,86 +188,106 @@ public class ByLawsFragment extends Fragment implements FragmentBackListener {
                 } else {
                     if (map.get("LocaPath").length() == 0) {
                         if (WiFiTool.isWifi(getContext())) {
-                            DialogTool.setprogressDialog(getContext(), "文件下载中");
-                            final Map<String, String> finalMap = map;
-                            BJDWDApplication.getExecutorService().execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    boolean isSave = false;
-                                    boolean isUpdDate = false;
-                                    String filepath = finalMap.get("Path").toString();
-                                    String fileName = filepath.split("/")[filepath.split("/").length - 1];
-                                    String loadfilepath = LiteralClass.LOAD_FILE_URL + filepath;
-                                    if (finalMap.get("Extension").equals(".zip") || finalMap.get("Extension").equals(".rar")) {
-                                        //获得压缩文件
-                                        byte[] bytes = HttpTool.getByteContent(loadfilepath);
-                                        if (bytes != null && bytes.length != 0) {
-                                            isSave = SDCardHelper.saveFileToSDCardCustomDir(bytes, "BJDWD", fileName);
-                                        }
-                                        if (isSave) {
-                                            try {
-                                                String loachpath = SDCardHelper.fileSdkPath("BJDWD") + "/" + fileName;
-//                                                String filepathzip = SDCardHelper.fileSdkPath("BJDWD") + "/" + fileName;
-//                                                String unzipfilepath = SDCardHelper.fileSdkPath("BJDWD") + "/" + fileName;
-//                                                FileUtil.unZipFile(filepathzip, unzipfilepath);
-//                                                String filetestpath = FileUtil.getFileDir(unzipfilepath);
-                                                isUpdDate = handleDBHelper.update("DirectoryInfo", new String[]{"LocaPath", "Isload"},
-                                                        new Object[]{loachpath, "true"},
-                                                        new String[]{"Id"}, new String[]{String.valueOf(finalMap.get("Id"))});
-                                                if (isUpdDate) {
-                                                    requestCode = 1;
-                                                } else {
-                                                    requestCode = 2;
-                                                }
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                        } else {
-                                            requestCode = 3;
-                                        }
-                                    } else {
-                                        //非压缩文件
-                                        byte[] bytes = HttpTool.getByteContent(loadfilepath);
-                                        if (bytes != null && bytes.length != 0) {
-                                            isSave = SDCardHelper.saveFileToSDCardCustomDir(bytes, "BJDWD", fileName);
-                                            if (isSave) {
-                                                String loachpath = SDCardHelper.fileSdkPath("BJDWD") + "/" + fileName;
-                                                isUpdDate = handleDBHelper.update("DirectoryInfo",
-                                                        new String[]{"LocaPath", "Isload"}, new Object[]{loachpath, "true"}, new String[]{"Id"},
-                                                        new String[]{String.valueOf(finalMap.get("Id"))});
-                                                if (isUpdDate) {
-                                                    fileLists = SQLClass.getDirectoryDataToMemuId(handleDBHelper, "DirectoryInfo", memudId);
-                                                    requestCode = 1;
-                                                } else {
-                                                    requestCode = 2;
-                                                }
-                                            } else {
-                                                requestCode = 3;
-                                            }
-                                        }
-                                    }
-
-                                    Message loginMessage = new Message();
-                                    loginMessage.arg1 = requestCode;
-                                    downloadHandler.sendMessage(loginMessage);
-                                }
-                            });
+                            //下载修改方法
+                            setprogressDialog("获取文件中...");
+                            downloadAndSave(map);
                         } else {
                             FileShowTool.setFileShow(getContext(), map);
                         }
                     } else {
-                        ShowToastTool.showToast(getContext(), "无线网络未连接...");
+                        try {
+                            List<Map> mapList = SQLClass.getFileDataToId(handleDBHelper, "DirectoryInfo", fileInfoId);
+                            if (mapList.size() != 0) {
+                                FileShowTool.setFileShow(getContext(), mapList.get(0));
+                            }
+                        } catch (UnsupportedOperationException u) {
+                            u.printStackTrace();
+                        }
                     }
                 }
-
             }
         });
     }
 
+    private void downloadAndSave(final Map filemap) {
+        String filepath = filemap.get("Path") + "";
+        String url = systemConfig.getHost() + systemConfig.getFilePort() + filepath;
+        final String fileName = filepath.split("/")[filepath.split("/").length - 1];
+
+        downloadRequest = NoHttp.createDownloadRequest(url,
+                SDCardHelper.fileSdkPath(StorageTool.FILEPATH),
+                fileName,
+                true,
+                false);
+        Log.i("文件服务器路径", "----->" + filepath);
+        BJDWDApplication.downloadQueue.add(0, downloadRequest, new DownloadListener() {
+            @Override
+            public void onDownloadError(int i, Exception e) {
+                Message messagefirst = downloadHandler.obtainMessage();
+                messagefirst.arg1 = 3;
+                downloadHandler.sendMessage(messagefirst);
+                Log.e("文件本服务器路径", "----->111");
+            }
+
+            @Override
+            public void onStart(int i, boolean b, long l, Headers headers, long l1) {
+            }
+
+            @Override
+            public void onProgress(int i, int i1, long l, long l1) {
+                Log.e("文件下载进度", "----->" + i + "====>" + i1 + "---->" + l + "====>" + l1);
+            }
+
+            @Override
+            public void onFinish(int i, String s) {
+                String loachpath = SDCardHelper.fileSdkPath(StorageTool.FILEPATH) + File.separator + fileName;
+                addPath(loachpath, filemap);
+
+                Message messagefirst = downloadHandler.obtainMessage();
+                messagefirst.arg1 = 1;
+                downloadHandler.sendMessage(messagefirst);
+                Log.e("文件下载", "--->下载取消");
+            }
+
+            @Override
+            public void onCancel(int what) {
+                Message messagefirst = downloadHandler.obtainMessage();
+                messagefirst.arg1 = 3;
+                downloadHandler.sendMessage(messagefirst);
+                Log.e("文件下载", "--->下载取消");
+            }
+        });
+
+    }
+
+    private void addPath(String loachpath, Map filemap) {
+        File file = new File(loachpath);
+        if (file.exists()) {
+            final String fileSavePath = StorageTool.getuuid();//解压文件保存路径
+
+            if (filemap.get("FileExtension").equals(".zip")) {
+                try {
+                    String unzipfilepath = loachpath + fileSavePath;
+                    StorageTool.unZipFile(loachpath, unzipfilepath);
+                    String filetestpath = StorageTool.getFileDir(unzipfilepath);
+                    handleDBHelper.update("DirectoryInfo", new String[]{"LocaPath", "IsLoad"},
+                            new Object[]{loachpath, "true"}, new String[]{"Id"}, new String[]{filemap.get("Id") + ""});
+
+                    Log.e("添加文件本地路径zip", "---->" + loachpath);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.e("添加文件本地路径非zip", "---->" + loachpath);
+                handleDBHelper.update("DirectoryInfo", new String[]{"LocaPath", "IsLoad"},
+                        new Object[]{loachpath, "true"}, new String[]{"Id"}, new String[]{filemap.get("Id") + ""});
+            }
+        }
+    }
 
     public void getTopestDir(final String directoryId) {
         if (WiFiTool.isWifi(getContext())) {
-            DialogTool.setprogressDialog(getContext(), "目录更新中");
+            setprogressDialog("获取中...");
             BJDWDApplication.getExecutorService().execute(new Runnable() {
                 @Override
                 public void run() {
@@ -287,7 +319,6 @@ public class ByLawsFragment extends Fragment implements FragmentBackListener {
             setAdapterData();
             ShowToastTool.showToast(getContext(), "无线网络未连接...");
         }
-
     }
 
     @Override
@@ -321,5 +352,37 @@ public class ByLawsFragment extends Fragment implements FragmentBackListener {
         fileLists = null;
         handleDBHelper = null;
         documentsShowAdapter = null;
+    }
+
+    public void setprogressDialog(String str) {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(getActivity(), ProgressDialog.THEME_HOLO_DARK);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setMessage(str + "....");
+            progressDialog.setIndeterminate(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setCancelable(false);
+        }
+
+        try {
+            if (progressDialog != null) {
+                progressDialog.show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cancelprogressDialog() {
+        try {
+            if (progressDialog != null) {
+                if (progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                    progressDialog = null;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

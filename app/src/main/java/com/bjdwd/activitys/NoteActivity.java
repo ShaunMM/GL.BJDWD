@@ -81,7 +81,7 @@ public class NoteActivity extends Activity implements View.OnClickListener {
                             .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    SQLClass.deleteAData(handleDBHelper, "NotePad", "Id", noteLists.get(position).get("Id").toString());
+                                    SQLClass.deleteData(handleDBHelper, "NotePad", "Id", noteLists.get(position).get("Id").toString());
                                     List<Map> nowNoteLists = SQLClass.getAllData(handleDBHelper, "NotePad");
                                     if (nowNoteLists.size() == 0) {
                                         note_linearLayout.setVisibility(View.GONE);

@@ -7,13 +7,13 @@
     <ImageView
         android:id="@+id/iv_logo"
         android:layout_width="240dp"
-        android:layout_height="100dp"
+        android:layout_height="80dp"
         android:background="@mipmap/logo" />
 
     <LinearLayout
         android:id="@+id/ll_title"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="80dp"
         android:layout_toRightOf="@+id/iv_logo"
         android:background="@color/colorblue"
         android:gravity="center"
@@ -49,15 +49,15 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="200dp"
-            android:layout_height="400dp"
+            android:layout_width="160dp"
+            android:layout_height="320dp"
             android:layout_marginTop="30dp"
             android:background="@mipmap/zi" />
 
         <LinearLayout
             android:id="@+id/ll_datadownload"
             android:layout_width="230dp"
-            android:layout_height="60dp"
+            android:layout_height="70dp"
             android:layout_marginTop="20dp"
             android:background="@color/btn_press_color"
             android:gravity="center"
@@ -72,11 +72,12 @@
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="50dp"
                 android:gravity="center"
                 android:text="更新资料"
                 android:textColor="@color/color_white"
-                android:textSize="20sp" />
+                android:textStyle="bold"
+                android:textSize="24sp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -91,8 +92,8 @@
             android:id="@+id/gv_functions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:columnWidth="100dp"
+            android:layout_margin="10dp"
+            android:columnWidth="80dp"
             android:horizontalSpacing="15dp"
             android:numColumns="3"
             android:scrollbars="none"

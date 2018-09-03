@@ -73,16 +73,18 @@ public class DocumentsShowAdapter extends BaseAdapter {
 
         fileExtension.toLowerCase();
 
-        if (fileExtension.equals(".zip") || fileExtension.equals(".htm") || fileExtension.equals(".doc")) {
-            fileHolder.iv_fileico.setImageResource(R.mipmap.wenjian);
-        } else if (fileExtension.equals(".png") || fileExtension.equals(".jpg")) {
-            fileHolder.iv_fileico.setImageResource(R.mipmap.picer);
+        if (fileExtension.equals(".zip") || fileExtension.equals(".htm") || fileExtension.equals(".doc")
+                || fileExtension.equals(".docx")|| fileExtension.equals(".ppt")|| fileExtension.equals(".pptx")) {
+            fileHolder.iv_fileico.setImageResource(R.mipmap.document);
+        } else if (fileExtension.equals(".png") || fileExtension.equals(".jpg") || fileExtension.equals(".jpeg")
+                || fileExtension.equals(".gif") || fileExtension.equals(".bmp")|| fileExtension.equals(".JPG")) {
+            fileHolder.iv_fileico.setImageResource(R.mipmap.pic);
         } else if (fileExtension.equals(".pdf")) {
             fileHolder.iv_fileico.setImageResource(R.mipmap.pdf);
         } else if (fileExtension.equals(".mp4")) {
-            fileHolder.iv_fileico.setImageResource(R.mipmap.yingxiang_js);
+            fileHolder.iv_fileico.setImageResource(R.mipmap.video);
         } else if (fileExtension.equals(".mp3")) {
-            fileHolder.iv_fileico.setImageResource(R.mipmap.yuyin_js);
+            fileHolder.iv_fileico.setImageResource(R.mipmap.audio);
         } else {
             if (fileLists.get(position).get("IsCommon").toString().equals("true")) {
                 fileHolder.iv_fileico.setImageResource(R.mipmap.wenjiajia);
